@@ -1,4 +1,5 @@
-package com.minis;
+package com.minis.beans;
+
 
 public class BeanDefinition {
     private String id;
