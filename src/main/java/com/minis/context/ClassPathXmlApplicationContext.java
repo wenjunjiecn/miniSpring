@@ -1,15 +1,12 @@
 package com.minis.context;
 
-import com.minis.beans.BeanDefinition;
-import com.minis.beans.BeanFactory;
-import com.minis.beans.BeansException;
-import com.minis.beans.SimpleBeanFactory;
+import com.minis.beans.*;
 import com.minis.core.ClassPathXmlResource;
 import com.minis.core.Resource;
 import com.minis.core.XmlBeanDefinitionReader;
 
 
-public class ClassPathXmlApplicationContext implements BeanFactory {
+public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
     BeanFactory beanFactory;
 
     public ClassPathXmlApplicationContext(String fileName) {
@@ -24,7 +21,29 @@ public class ClassPathXmlApplicationContext implements BeanFactory {
         return this.beanFactory.getBean(beanName);
     }
 
-    public void registerBeanDefinition(BeanDefinition beanDefinition) {
-        this.beanFactory.registerBeanDefinition(beanDefinition);
+    @Override
+    public boolean isSingleton(String name) {
+        return false;
+    }
+
+    @Override
+    public boolean isPrototype(String name) {
+        return false;
+    }
+
+    @Override
+    public Class<?> getType(String name) {
+        return null;
+    }
+
+    @Override
+    public void registerBean(String beanID, BeanDefinition beanDefinition) {
+        this.beanFactory.registerBean(beanID, beanDefinition);
+    }
+
+
+    @Override
+    public void publishEvent(ApplicationEvent event) {
+
     }
 }

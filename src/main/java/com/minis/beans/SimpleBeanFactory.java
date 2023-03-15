@@ -1,43 +1,59 @@
 package com.minis.beans;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class SimpleBeanFactory implements BeanFactory {
-    private List<BeanDefinition> beanDefinitions = new ArrayList<>();
-    private List<String> beanNames = new ArrayList<>();
-    private Map<String, Object> singletons = new HashMap<>();
 
-    public SimpleBeanFactory() {
+public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
+    private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
+    private List<String> beanDefinitionNames = new ArrayList<>();
 
-    }
-
-    @Override
-    public Object getBean(String beanName) throws BeansException {
-        Object singleton = singletons.get(beanName);
-        if (singleton == null) {
-            int i = beanNames.indexOf(beanName);
-            if (i == -1) {
-                throw new BeansException();
-            } else {
-                BeanDefinition beanDefinition = beanDefinitions.get(i);
-                try {
-                    singleton = Class.forName(beanDefinition.getClassName());
-                    singletons.put(beanDefinition.getId(), singleton);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-
+    public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {
+        this.beanDefinitionMap.put(name, beanDefinition);
+        this.beanDefinitionNames.add(name);
+        if (!beanDefinition.isLazyInit()) {
+            try {
+                getBean(name);
+            } catch (BeansException | ClassNotFoundException e) {
             }
         }
-        return singleton;
+    }
+
+    public void removeBeanDefinition(String name) {
+        this.beanDefinitionMap.remove(name);
+        this.beanDefinitionNames.remove(name);
+        this.removeSingleton(name);
+    }
+
+    public BeanDefinition getBeanDefinition(String name) {
+        return this.beanDefinitionMap.get(name);
+    }
+
+    public boolean containsBeanDefinition(String name) {
+        return this.beanDefinitionMap.containsKey(name);
     }
 
     @Override
-    public void registerBeanDefinition(BeanDefinition beanDefinition) {
-        this.beanDefinitions.add(beanDefinition);
-        this.beanNames.add(beanDefinition.getId());
+    public Object getBean(String beanName) throws BeansException, ClassNotFoundException {
+        return null;
+    }
+
+    public boolean isSingleton(String name) {
+        return this.beanDefinitionMap.get(name).isSingleton();
+    }
+
+    public boolean isPrototype(String name) {
+        return this.beanDefinitionMap.get(name).isPrototype();
+    }
+
+    public Class<?> getType(String name) {
+        return this.beanDefinitionMap.get(name).getClass();
+    }
+
+    @Override
+    public void registerBean(String beanID, BeanDefinition beanDefinition) {
+
     }
 }
